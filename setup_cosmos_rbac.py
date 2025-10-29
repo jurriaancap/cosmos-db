@@ -30,7 +30,7 @@ CONTAINER_NAME = os.environ['CONTAINER_NAME']
 
 # USER CONFIGURATION
 USER_EMAIL = ""  # Leave empty to use current user, or set to "user@domain.com"
-PRINCIPAL_ID = "50dadfcf-c2ac-4fbd-b115-37132c54f76f"  # Leave empty to auto-detect
+PRINCIPAL_ID = ""  # Leave empty to auto-detect
 
 # ROLE DEFINITION IDs
 DATA_READER_ROLE = "00000000-0000-0000-0000-000000000001"

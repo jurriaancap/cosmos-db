@@ -82,36 +82,78 @@ def lookup_principal_details(principal_id, credential):
     """
     return asyncio.run(lookup_principal_details_async(principal_id, credential))
 
-print("=== Cosmos DB Role Assignments ===")
+def get_role_name(role_definition_id):
+    """Get friendly role name from role definition ID"""
+    if role_definition_id and role_definition_id.endswith("00000000-0000-0000-0000-000000000002"):
+        return "Cosmos DB Built-in Data Contributor"
+    elif role_definition_id and role_definition_id.endswith("00000000-0000-0000-0000-000000000001"):
+        return "Cosmos DB Built-in Data Reader"
+    else:
+        return "Custom/Other Role"
+
+def get_scope_level(scope):
+    """Get scope level description"""
+    if scope.endswith("/colls/" + CONTAINER_NAME):
+        return "Container"
+    elif scope.endswith("/dbs/" + DATABASE_NAME):
+        return "Database"
+    elif scope.endswith(ACCOUNT_NAME):
+        return "Account"
+    else:
+        return "Other"
+
+print("=== Cosmos DB Roles and Members ===")
 
 # --- List role assignments ---
 try:
     assignments = cosmos_client.sql_resources.list_sql_role_assignments(RESOURCE_GROUP, ACCOUNT_NAME)
-
+    
+    # Group assignments by role and scope
+    roles_dict = {}
+    
     for a in assignments:
-        print(f"Role Assignment ID: {a.name}")
-        print(f"Principal ID: {a.principal_id}")
+        role_name = get_role_name(a.role_definition_id)
+        scope_level = get_scope_level(a.scope)
+        role_key = f"{role_name} ({scope_level})"
+        
+        if role_key not in roles_dict:
+            roles_dict[role_key] = {
+                'members': [],
+                'scope': a.scope,
+                'role_definition_id': a.role_definition_id
+            }
         
         # Lookup principal details
         principal_info = lookup_principal_details(a.principal_id, credential)
-        print(f"Display Name: {principal_info['displayName']}")
-        print(f"Email: {principal_info['email']}")
-        print(f"Principal Type: {principal_info['type']}")
+        member_info = {
+            'principal_id': a.principal_id,
+            'display_name': principal_info['displayName'],
+            'email': principal_info['email'],
+            'type': principal_info['type'],
+            'assignment_id': a.name
+        }
         
-        print(f"Role Definition ID: {a.role_definition_id}")
-        print(f"Scope: {a.scope}")
+        # Avoid duplicate members in same role
+        if not any(m['principal_id'] == member_info['principal_id'] for m in roles_dict[role_key]['members']):
+            roles_dict[role_key]['members'].append(member_info)
+    
+    # Display results grouped by role
+    for role_name, role_info in roles_dict.items():
+        print(f"\nROLE: {role_name}")
+        #print(f"   Scope: {role_info['scope']}")
+        print(f"   Role Definition: {role_info['role_definition_id']}")
+        print(f"   Members ({len(role_info['members'])}):")
         
-        # Check if it's the Data Contributor role
-        if a.role_definition_id and a.role_definition_id.endswith("00000000-0000-0000-0000-000000000002"):
-            print("Role Type: Cosmos DB Built-in Data Contributor")
-        elif a.role_definition_id and a.role_definition_id.endswith("00000000-0000-0000-0000-000000000001"):
-            print("Role Type: Cosmos DB Built-in Data Reader")
-        else:
-            print("Role Type: Custom/Other")
-            
-        print("-" * 60)
+        for member in role_info['members']:
+            print(f"        user: {member['display_name']} ({member['type']})")
+            print(f"        Email: {member['email']}")
+            print(f"        Principal ID: {member['principal_id']}")
+            print(f"        Assignment ID: {member['assignment_id']}")
+            print()
+        
+        print("-" * 80)
 
 except Exception as e:
     print(f"Error listing role assignments: {e}")
     print("\nMake sure you have the required permissions and the azure-mgmt-cosmosdb package installed")
-    print("Install with: pip install azure-mgmt-cosmosdb")
+    print("Install with: uv add azure-mgmt-cosmosdb")
