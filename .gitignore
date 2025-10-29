@@ -11,3 +11,5 @@ wheels/
 
 .env
 .*.cli
+
+setup-cosmos-rbac.sh
