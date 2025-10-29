@@ -5,7 +5,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# we load the environment variables from the .env file (ADD this file to the gitignore ! never publish youre api keys !!! not even in a commit that you overwrite 
 load_dotenv()
 
 ## we load the variables from the env. please ensure that the env. is NEVER commited to a public repo. this holds youre private information 
@@ -15,18 +15,23 @@ ACCOUNT_NAME = os.environ['ACCOUNT_NAME']
 DATABASE_NAME = os.environ['DATABASE_NAME']
 CONTAINER_NAME = os.environ['CONTAINER_NAME']
 
+## now we setup the credential for azure authentication using the default azure credential
 credential = DefaultAzureCredential()
+## then we create the cosmos client for management operations (not for data operations!)
 cosmos_client = CosmosDBManagementClient(credential, SUBSCRIPTION_ID)
 
+
+## here we have the helper functigon to look up the principal and match it against a user, sp or group
 async def lookup_principal_details_async(principal_id, credential):
     """
-    Lookup principal details using Microsoft Graph SDK (async version)
+    this function does lookup principal details using Microsoft Graph SDK (async version)
+    we need this to convert the ugly GUID principal ids to human readable names
     """
     try:
-        # Initialize Graph client
+        # we Initialize Graph client to talk to microsoft graph api
         graph_client = GraphServiceClient(credentials=credential)
         
-        # Try user first
+        # first we Try to find if its a user 
         try:
             user = await graph_client.users.by_user_id(principal_id).get()
             if user:
@@ -38,7 +43,7 @@ async def lookup_principal_details_async(principal_id, credential):
         except Exception as e:
             print(f"    Debug: User lookup failed: {e}")
         
-        # Try service principal
+        # if not user, maybe its a service principal (like an application)
         try:
             sp = await graph_client.service_principals.by_service_principal_id(principal_id).get()
             if sp:
@@ -50,7 +55,7 @@ async def lookup_principal_details_async(principal_id, credential):
         except Exception as e:
             print(f"    Debug: Service Principal lookup failed: {e}")
         
-        # Try group
+        # if not service principal, maybe its a group
         try:
             group = await graph_client.groups.by_group_id(principal_id).get()
             if group:
@@ -62,7 +67,7 @@ async def lookup_principal_details_async(principal_id, credential):
         except Exception as e:
             print(f"    Debug: Group lookup failed: {e}")
         
-        # Not found in any category
+        # if we reach here, we didnt find anything :(
         return {
             "displayName": "Not Found",
             "email": "Not Found", 
@@ -70,20 +75,25 @@ async def lookup_principal_details_async(principal_id, credential):
         }
         
     except Exception as e:
+        # something went wrong with the whole lookup
         return {
             "displayName": f"Error: {str(e)}",
             "email": "Error",
             "type": "Error"
         }
 
+
+## i dunno, this i just copied from someone when i had some problems. 
 def lookup_principal_details(principal_id, credential):
     """
-    Synchronous wrapper for the async Graph lookup
+    this is synchronous wrapper for the async Graph lookup
+    because we cant use async in the main program flow easily
     """
     return asyncio.run(lookup_principal_details_async(principal_id, credential))
 
+## get the name of the role , these are hardcoded !!! in cosmos db
 def get_role_name(role_definition_id):
-    """Get friendly role name from role definition ID"""
+    """this function gets friendly role name from the ugly role definition ID"""
     if role_definition_id and role_definition_id.endswith("00000000-0000-0000-0000-000000000002"):
         return "Cosmos DB Built-in Data Contributor"
     elif role_definition_id and role_definition_id.endswith("00000000-0000-0000-0000-000000000001"):
@@ -91,8 +101,9 @@ def get_role_name(role_definition_id):
     else:
         return "Custom/Other Role"
 
+# get the scope level from the container aname or datbase naem etc 
 def get_scope_level(scope):
-    """Get scope level description"""
+    """this function gets scope level description so we know what level the permission is"""
     if scope.endswith("/colls/" + CONTAINER_NAME):
         return "Container"
     elif scope.endswith("/dbs/" + DATABASE_NAME):
@@ -102,20 +113,28 @@ def get_scope_level(scope):
     else:
         return "Other"
 
+
+## here we start outputing stuff 
 print("=== Cosmos DB Roles and Members ===")
 
-# --- List role assignments ---
+# --- now we List all the role assignments from cosmos db ---
 try:
+    ## we get all the assignments from the cosmos db account
     assignments = cosmos_client.sql_resources.list_sql_role_assignments(RESOURCE_GROUP, ACCOUNT_NAME)
     
-    # Group assignments by role and scope
+    # we Group assignments by role and scope so we can show them nicely organized
     roles_dict = {}
     
+    ## we loop through each assignment to organize them
     for a in assignments:
+        ## we get the friendly role name instead of the ugly GUID
         role_name = get_role_name(a.role_definition_id)
+        ## we get the scope level so we know if its account, database or container level
         scope_level = get_scope_level(a.scope)
+        ## we combine role name and scope to make a unique key
         role_key = f"{role_name} ({scope_level})"
         
+        ## if this role+scope combination is new, we create a new entry
         if role_key not in roles_dict:
             roles_dict[role_key] = {
                 'members': [],
@@ -123,8 +142,15 @@ try:
                 'role_definition_id': a.role_definition_id
             }
         
-        # Lookup principal details
+        roles_dict[role_key] = {
+                'members': [],
+                'scope': a.scope,
+                'role_definition_id': a.role_definition_id
+            }
+        
+        # now we Lookup the principal details to get human readable name
         principal_info = lookup_principal_details(a.principal_id, credential)
+        ## we create member info object with all the details
         member_info = {
             'principal_id': a.principal_id,
             'display_name': principal_info['displayName'],
@@ -133,19 +159,22 @@ try:
             'assignment_id': a.name
         }
         
-        # Avoid duplicate members in same role
+        # we check to Avoid duplicate members in same role (same person shouldnt appear twice in same role)
+
         if not any(m['principal_id'] == member_info['principal_id'] for m in roles_dict[role_key]['members']):
             roles_dict[role_key]['members'].append(member_info)
     
-    # Display results grouped by role
+    # now we Display results grouped by role in a nice way
     for role_name, role_info in roles_dict.items():
-        print(f"\nROLE: {role_name}")
+        print(f"\n ROLE: {role_name}")
+        # # i have excluded because its soo long 
         #print(f"   Scope: {role_info['scope']}")
-        print(f"   Role Definition: {role_info['role_definition_id']}")
+        #print(f"   Role Definition: {role_info['role_definition_id']}")
         print(f"   Members ({len(role_info['members'])}):")
         
+        ## we loop through each member of this role to show their details
         for member in role_info['members']:
-            print(f"        user: {member['display_name']} ({member['type']})")
+            print(f"        {member['display_name']} ({member['type']})")
             print(f"        Email: {member['email']}")
             print(f"        Principal ID: {member['principal_id']}")
             print(f"        Assignment ID: {member['assignment_id']}")

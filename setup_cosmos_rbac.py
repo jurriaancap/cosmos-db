@@ -51,8 +51,8 @@ def get_principal_id(credential):
     
     # For now, you'll need to provide the principal ID manually
     # You can get it with: az ad signed-in-user show --query id -o tsv
-    print("❌ Please provide PRINCIPAL_ID in the script")
-    print("   Get it with: az ad signed-in-user show --query id -o tsv")
+    print("Please provide PRINCIPAL_ID in the script")
+    print("Get it with: az ad signed-in-user show --query id -o tsv")
     sys.exit(1)
 
 def create_azure_rbac_roles(auth_client, principal_id, account_scope):
@@ -82,9 +82,9 @@ def create_azure_rbac_roles(auth_client, principal_id, account_scope):
             
         except Exception as e:
             if "already exists" in str(e).lower():
-                print(f"⚠️  {role_name} role assignment already exists")
+                print(f"{role_name} role assignment already exists")
             else:
-                print(f"❌ Error creating {role_name}: {e}")
+                print(f"Error creating {role_name}: {e}")
 
 def get_role_definition_id(role_name):
     """Get the role definition ID for built-in roles"""
@@ -120,13 +120,13 @@ def create_cosmos_data_plane_roles(cosmos_client, principal_id, account_scope, d
                 }
             )
             
-            print(f"✅ Created {scope_name} Data Contributor role")
+            print(f"Created {scope_name} Data Contributor role")
             
         except Exception as e:
             if "already exists" in str(e).lower():
-                print(f"⚠️  {scope_name} role assignment already exists")
+                print(f"{scope_name} role assignment already exists")
             else:
-                print(f"❌ Error creating {scope_name} role: {e}")
+                print(f"Error creating {scope_name} role: {e}")
 
 def main():
     print("=== Azure Cosmos DB RBAC Setup (Python) ===")
