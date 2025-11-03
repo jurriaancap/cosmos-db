@@ -1,0 +1,55 @@
+{
+  "HotelId": "400",
+  "HotelName": "Harbor Lights Inn",
+  "Description": "A cozy seaside inn overlooking the marina, offering comfortable rooms and fresh seafood dining.",
+  "Description_fr": "Une auberge en bord de mer surplombant la marina, proposant des chambres confortables et des fruits de mer frais.",
+  "Category": "Inn",
+  "Tags": ["seaside", "restaurant", "harbor view"],
+  "ParkingIncluded": true,
+  "IsDeleted": false,
+  "LastRenovationDate": "2024-03-22T00:00:00Z",
+  "Rating": 4.2,
+  "Address": {
+    "StreetAddress": "12 Harbor Street",
+    "City": "Seattle",
+    "StateProvince": "WA",
+    "PostalCode": "98101",
+    "Country": "USA"
+  },
+  "Location": {
+    "type": "Point",
+    "coordinates": [-122.337, 47.6062]
+  },
+  "Rooms": [
+    {
+      "Description": "Standard Room, 1 Queen Bed (Harbor View)",
+      "Description_fr": "Chambre Standard, 1 grand lit (vue sur le port)",
+      "Type": "Standard Room",
+      "BaseRate": 134.99,
+      "BedOptions": "1 Queen Bed",
+      "SleepsCount": 2,
+      "SmokingAllowed": false,
+      "Tags": ["tv", "coffee maker"]
+    },
+    {
+      "Description": "Deluxe Room, 1 King Bed (Balcony)",
+      "Description_fr": "Chambre Deluxe, 1 très grand lit (balcon)",
+      "Type": "Deluxe Room",
+      "BaseRate": 189.99,
+      "BedOptions": "1 King Bed",
+      "SleepsCount": 2,
+      "SmokingAllowed": false,
+      "Tags": ["balcony", "harbor view", "jacuzzi tub"]
+    },
+    {
+      "Description": "Family Suite, 2 Bedrooms (Marina View)",
+      "Description_fr": "Suite familiale, 2 chambres (vue sur la marina)",
+      "Type": "Suite",
+      "BaseRate": 259.99,
+      "BedOptions": "1 King + 2 Twin Beds",
+      "SleepsCount": 4,
+      "SmokingAllowed": false,
+      "Tags": ["balcony", "tv", "mini fridge"]
+    }
+  ]
+}

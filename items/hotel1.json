@@ -1,0 +1,92 @@
+[
+  {
+    "HotelId": "200",
+    "HotelName": "Azure Bay Resort",
+    "Description": "Luxury beachfront resort offering panoramic sea views, fine dining, and a private beach.",
+    "Description_fr": "Complexe de luxe en bord de mer offrant une vue panoramique sur la mer, une cuisine raffinée et une plage privée.",
+    "Category": "Resort",
+    "Tags": ["beach", "spa", "pool"],
+    "ParkingIncluded": true,
+    "IsDeleted": false,
+    "LastRenovationDate": "2023-06-12T00:00:00Z",
+    "Rating": 4.8,
+    "Address": {
+      "StreetAddress": "25 Ocean Drive",
+      "City": "Miami",
+      "StateProvince": "FL",
+      "PostalCode": "33139",
+      "Country": "USA"
+    },
+    "Location": {
+      "type": "Point",
+      "coordinates": [-80.130045, 25.790654]
+    },
+    "Rooms": [
+      {
+        "Description": "Ocean View Suite, 1 King Bed",
+        "Description_fr": "Suite vue sur l'océan, 1 très grand lit",
+        "Type": "Suite",
+        "BaseRate": 349.99,
+        "BedOptions": "1 King Bed",
+        "SleepsCount": 2,
+        "SmokingAllowed": false,
+        "Tags": ["balcony", "jacuzzi tub", "tv"]
+      },
+      {
+        "Description": "Standard Room, 2 Double Beds",
+        "Description_fr": "Chambre standard, 2 lits doubles",
+        "Type": "Standard Room",
+        "BaseRate": 189.99,
+        "BedOptions": "2 Double Beds",
+        "SleepsCount": 4,
+        "SmokingAllowed": false,
+        "Tags": ["tv", "coffee maker"]
+      }
+    ]
+  },
+  {
+    "HotelId": "3",
+    "HotelName": "Mountain Haven Lodge",
+    "Description": "Charming lodge located in the Rocky Mountains with rustic decor and hiking trails nearby.",
+    "Description_fr": "Charmant pavillon situé dans les montagnes Rocheuses avec une décoration rustique et des sentiers de randonnée à proximité.",
+    "Category": "Lodge",
+    "Tags": ["mountain", "hiking", "fireplace"],
+    "ParkingIncluded": true,
+    "IsDeleted": false,
+    "LastRenovationDate": "2021-09-30T00:00:00Z",
+    "Rating": 4.4,
+    "Address": {
+      "StreetAddress": "145 Aspen Rd",
+      "City": "Aspen",
+      "StateProvince": "CO",
+      "PostalCode": "81611",
+      "Country": "USA"
+    },
+    "Location": {
+      "type": "Point",
+      "coordinates": [-106.819999, 39.191099]
+    },
+    "Rooms": [
+      {
+        "Description": "Cabin Room, 1 Queen Bed",
+        "Description_fr": "Chambre cabine, 1 grand lit",
+        "Type": "Cabin Room",
+        "BaseRate": 139.99,
+        "BedOptions": "1 Queen Bed",
+        "SleepsCount": 2,
+        "SmokingAllowed": false,
+        "Tags": ["fireplace", "mountain view"]
+      },
+      {
+        "Description": "Family Suite, 2 Bedrooms",
+        "Description_fr": "Suite familiale, 2 chambres",
+        "Type": "Suite",
+        "BaseRate": 259.99,
+        "BedOptions": "2 Queen Beds",
+        "SleepsCount": 4,
+        "SmokingAllowed": false,
+        "Tags": ["balcony", "coffee maker"]
+      }
+    ]
+  }
+]
